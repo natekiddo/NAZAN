@@ -38,8 +38,8 @@ ProjectHub is a modern, production-grade workspace and project management web ap
 - **Time-Limited Signed URLs**: Secure authenticated access to download and preview files without public bucket exposure.
 - **Search & Filters**: Filter by project, file category (images, documents, code, archives), and search by name.
 
-### 5. 🤖 Gemini 2.5 Flash AI Assistant
-- **Context-Aware Workspace Assistant**: Chat with Google's Gemini 2.5 Flash model directly within the dashboard.
+### 5. 🤖 Gemini 3.8 Flash AI Assistant
+- **Context-Aware Workspace Assistant**: Chat with Google's Gemini 3.8 Flash model (`gemini-3.8-flash` or `models/gemini-3.8-flash`) directly within the dashboard.
 - **Automatic Workspace Context**: The assistant automatically inspects your active projects, pending high-priority tasks, and recent session notes to give actionable advice.
 - **Daily Executive Briefing**: Generate on-demand daily summaries highlighting your most critical deadlines, blocker mitigations, and prioritized to-do list.
 - **Resilient Fallback Mode**: Gracefully operates even when offline or before an API key is configured with built-in heuristic analysis.
@@ -72,7 +72,7 @@ ProjectHub is a modern, production-grade workspace and project management web ap
 - **UI Library**: [React 19](https://react.dev/)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) & [Lucide React](https://lucide.dev/) Icons
 - **Database & Auth**: [Supabase](https://supabase.com/) (PostgreSQL with RLS, SSR Auth, Edge Storage)
-- **AI Engine**: Google Gemini API via official `@google/genai` SDK (`gemini-2.5-flash`)
+- **AI Engine**: Google Gemini API via official `@google/genai` SDK (`gemini-3.8-flash`)
 - **Email Service**: [Resend](https://resend.com/) API
 - **File Utilities**: [JSZip](https://stuk.github.io/jszip/) for client-side archive generation
 - **TypeScript**: Strict type-checking across all schemas, server actions, and API routes
