@@ -212,8 +212,8 @@ What technical challenge or feature sprint are we crushing today?`,
 
     try {
       // Pass previous chat history for multi-turn reasoning
-      const historyPayload = activeThread.messages.map((m) => ({
-        role: m.role as 'user' | 'assistant',
+      const historyPayload: Array<{ role: 'user' | 'model'; content: string }> = activeThread.messages.map((m) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
         content: m.content,
       }));
 

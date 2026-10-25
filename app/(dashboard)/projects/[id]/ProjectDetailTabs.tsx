@@ -8,7 +8,6 @@ import {
   FileText,
   Clock,
   FolderGit2,
-  Sparkles,
 } from 'lucide-react';
 import { Project, Task, Milestone, ProjectNote, WorkSession, FileItem, Folder } from '@/types';
 import ProjectOverviewTab from '@/components/projects/detail/ProjectOverviewTab';
@@ -17,7 +16,6 @@ import ProjectMilestonesTab from '@/components/projects/detail/ProjectMilestones
 import ProjectNotesTab from '@/components/projects/detail/ProjectNotesTab';
 import ProjectHistoryTab from '@/components/projects/detail/ProjectHistoryTab';
 import ProjectFilesTab from '@/components/projects/detail/ProjectFilesTab';
-import ProjectAIMemoryTab from '@/components/projects/detail/ProjectAIMemoryTab';
 
 interface ProjectDetailTabsProps {
   project: Project;
@@ -38,11 +36,10 @@ export default function ProjectDetailTabs({
   files = [],
   folders = [],
 }: ProjectDetailTabsProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'milestones' | 'notes' | 'files' | 'history' | 'ai-memory'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tasks' | 'milestones' | 'notes' | 'files' | 'history'>('overview');
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'ai-memory', label: 'AI Memory & Briefing', icon: Sparkles, badge: 'Gemini' },
     { id: 'tasks', label: `Tasks (${tasks.length})`, icon: CheckSquare },
     { id: 'milestones', label: `Milestones (${milestones.length})`, icon: Flag },
     { id: 'files', label: `Files (${files.length})`, icon: FolderGit2 },
@@ -70,13 +67,6 @@ export default function ProjectDetailTabs({
             >
               <Icon className="w-4 h-4" />
               {tab.label}
-              {tab.badge && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-md font-bold uppercase tracking-wider ${
-                  isActive ? 'bg-white/20 text-white' : 'bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300'
-                }`}>
-                  {tab.badge}
-                </span>
-              )}
             </button>
           );
         })}
@@ -86,9 +76,6 @@ export default function ProjectDetailTabs({
       <div>
         {activeTab === 'overview' && (
           <ProjectOverviewTab project={project} tasks={tasks} sessions={sessions} />
-        )}
-        {activeTab === 'ai-memory' && (
-          <ProjectAIMemoryTab project={project} sessions={sessions} tasks={tasks} />
         )}
         {activeTab === 'tasks' && <ProjectTasksTab project={project} tasks={tasks} />}
         {activeTab === 'milestones' && (
