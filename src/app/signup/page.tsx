@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import {
   AuthError,
@@ -30,7 +30,6 @@ export default function SignUpPage() {
     setError(null);
     setSuccessMessage(null);
 
-    // New: client-side check only. Remove this block and the confirm field to go back to the original form.
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
@@ -55,81 +54,85 @@ export default function SignUpPage() {
       return;
     }
 
-    setSuccessMessage('Account created successfully! Redirecting to dashboard...');
+    setSuccessMessage('Account created successfully! Redirecting...');
     setTimeout(() => {
       router.push('/dashboard');
       router.refresh();
-    }, 1500);
+    }, 1200);
   };
 
   return (
     <AuthShell
       footer={
         <>
-          Already have a workspace?{' '}
+          Already have an account?{' '}
           <Link href="/login" className={linkClass}>
             Sign in
           </Link>
         </>
       }
     >
-      <AuthHeading title="Make it yours." text="Set up your workspace and bring all your work together." />
+      <AuthHeading
+        title="Create account"
+        text="Join your workspace to manage projects, AI, and files."
+      />
 
       {error && <AuthError message={error} />}
       {successMessage && <AuthSuccess message={successMessage} />}
 
-      <form onSubmit={handleSignUp} className="space-y-4">
+      <form onSubmit={handleSignUp} className="space-y-2.5">
         <Field
-          label="Full name"
+          label="Full Name"
           required
           autoComplete="name"
           value={fullName}
           onChange={setFullName}
-          placeholder="Natty Developer"
+          placeholder="John Doe"
         />
 
         <Field
-          label="Email address"
+          label="Email"
           type="email"
           required
           autoComplete="email"
           value={email}
           onChange={setEmail}
-          placeholder="you@example.com"
+          placeholder="name@example.com"
         />
 
-        <Field
-          label="Password"
-          type="password"
-          required
-          minLength={6}
-          autoComplete="new-password"
-          value={password}
-          onChange={setPassword}
-          placeholder="At least 6 characters"
-        />
+        <div className="grid grid-cols-2 gap-2">
+          <Field
+            label="Password"
+            type="password"
+            required
+            minLength={6}
+            autoComplete="new-password"
+            value={password}
+            onChange={setPassword}
+            placeholder="Min 6 chars"
+          />
 
-        <Field
-          label="Confirm password"
-          type="password"
-          required
-          minLength={6}
-          autoComplete="new-password"
-          value={confirmPassword}
-          onChange={setConfirmPassword}
-          placeholder="Repeat your password"
-        />
+          <Field
+            label="Confirm"
+            type="password"
+            required
+            minLength={6}
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            placeholder="Repeat"
+          />
+        </div>
 
-        <button type="submit" disabled={loading} className={`${primaryButton} mt-7!`}>
-          {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <>
-              <span>Create Account</span>
-              <ArrowRight className="h-4 w-4" />
-            </>
-          )}
-        </button>
+        <div className="pt-1.5">
+          <button type="submit" disabled={loading} className={primaryButton}>
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin text-white" />
+            ) : (
+              'Create Account'
+            )}
+          </button>
+        </div>
       </form>
     </AuthShell>
   );

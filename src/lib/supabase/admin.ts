@@ -13,7 +13,8 @@ export function createAdminClient() {
   if (
     !serviceRoleKey ||
     serviceRoleKey === 'your-secret-key-here' ||
-    serviceRoleKey.trim() === ''
+    serviceRoleKey.trim() === '' ||
+    serviceRoleKey.startsWith('sb_secret_')
   ) {
     return null;
   }

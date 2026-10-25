@@ -149,11 +149,11 @@ export default function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModal
   const getIcon = (type: SearchResultItem['type']) => {
     switch (type) {
       case 'project':
-        return <FolderGit2 className="w-4 h-4 text-[#1a73e8]" />;
+        return <FolderGit2 className="w-4 h-4 text-slate-500" />;
       case 'task':
         return <CheckSquare className="w-4 h-4 text-[#1e8e3e]" />;
       case 'session':
-        return <Clock className="w-4 h-4 text-[#f9ab00]" />;
+        return <Clock className="w-4 h-4 text-saffron-500" />;
       case 'file':
         return <FileText className="w-4 h-4 text-purple-500" />;
     }
@@ -161,7 +161,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModal
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl bg-white dark:bg-[#0c1220] rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col">
+      <div className="w-full max-w-2xl bg-white dark:bg-slate-950 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col">
         {/* Search Input Bar */}
         <div className="flex items-center px-5 py-4 border-b border-slate-100 dark:border-slate-800/80">
           <Search className="w-5 h-5 text-slate-400 mr-3" />
@@ -203,7 +203,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModal
               onClick={() => setActiveFilter(tab.id as any)}
               className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 activeFilter === tab.id
-                  ? 'bg-indigo-600 text-white shadow-2xs font-semibold'
+                  ? 'bg-slate-900 text-white shadow-2xs font-bold dark:bg-saffron-400 dark:text-slate-900'
                   : 'bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80'
               }`}
             >
@@ -254,7 +254,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModal
                       {getIcon(item.type)}
                     </div>
                     <div className="truncate">
-                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-brand-500 dark:group-hover:text-saffron-400 transition-colors">
                         {item.title}
                       </p>
                       {item.subtitle && (
@@ -264,7 +264,7 @@ export default function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModal
                       )}
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-brand-500 dark:group-hover:text-saffron-400 group-hover:translate-x-0.5 transition-all" />
                 </Link>
               ))}
             </div>

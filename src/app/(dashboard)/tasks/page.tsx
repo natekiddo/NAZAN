@@ -13,7 +13,6 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { getProjects } from '@/lib/actions/projects';
 import { Task, Project, TaskStatus, TaskPriority } from '@/types';
 import TaskKanban from '@/components/tasks/TaskKanban';
 import TaskList from '@/components/tasks/TaskList';
@@ -42,36 +41,21 @@ export default function TasksPage() {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (user) {
-      // 1. Fetch Projects for filter dropdown (personal + shared workspace projects)
-      const { projects: projList } = await getProjects();
-      setProjects(projList || []);
+      // 1. Fetch Projects for filter dropdown
+      const { data: projData } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('name');
+      setProjects((projData as unknown as Project[]) || []);
 
-      const projectIds = (projList || []).map((p) => p.id);
-
-      // 2. Fetch Tasks with Project join (user's tasks + shared project tasks)
-      let taskQuery = supabase
+      // 2. Fetch Tasks with Project join
+      const { data: taskData } = await supabase
         .from('tasks')
         .select('*, project:projects(*)')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-
-      if (projectIds.length > 0) {
-        taskQuery = taskQuery.or(`user_id.eq.${user.id},project_id.in.(${projectIds.join(',')})`);
-      } else {
-        taskQuery = taskQuery.eq('user_id', user.id);
-      }
-
-      const { data: taskData, error } = await taskQuery;
-      if (!error && taskData) {
-        setTasks(taskData as unknown as (Task & { project?: Project | null })[]);
-      } else {
-        // Fallback to own tasks
-        const { data: fallbackTasks } = await supabase
-          .from('tasks')
-          .select('*, project:projects(*)')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-        setTasks((fallbackTasks as unknown as (Task & { project?: Project | null })[]) || []);
-      }
+      setTasks((taskData as unknown as (Task & { project?: Project | null })[]) || []);
     }
     setLoading(false);
   };
@@ -152,7 +136,7 @@ export default function TasksPage() {
             <p className="text-[11px] text-slate-500 font-medium">Total Tasks</p>
             <p className="text-xl font-bold text-slate-900 dark:text-white">{totalCount}</p>
           </div>
-          <span className="rounded-xl bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400"><CheckSquare className="w-5 h-5" /></span>
+          <span className="rounded-xl bg-brand-50 p-2 text-brand-500 dark:bg-slate-800 dark:text-saffron-400"><CheckSquare className="w-5 h-5" /></span>
         </div>
 
         <div className="workspace-panel flex items-center justify-between !p-4">
@@ -178,7 +162,7 @@ export default function TasksPage() {
               {completedCount}
             </p>
           </div>
-          <span className="rounded-xl bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400"><CheckCircle2 className="w-5 h-5" /></span>
+          <span className="rounded-xl bg-brand-50 p-2 text-brand-500 dark:bg-slate-800 dark:text-saffron-400"><CheckCircle2 className="w-5 h-5" /></span>
         </div>
       </div>
 
@@ -192,7 +176,7 @@ export default function TasksPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search tasks by title, project, description..."
-            className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
 
@@ -233,7 +217,7 @@ export default function TasksPage() {
               onClick={() => setViewMode('kanban')}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 viewMode === 'kanban'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-2xs font-semibold'
+                  ? 'bg-white dark:bg-slate-700 text-brand-500 dark:text-saffron-400 shadow-2xs'
                   : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
               title="Kanban Board"
@@ -245,7 +229,7 @@ export default function TasksPage() {
               onClick={() => setViewMode('list')}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 viewMode === 'list'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-2xs font-semibold'
+                  ? 'bg-white dark:bg-slate-700 text-brand-500 dark:text-saffron-400 shadow-2xs'
                   : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
               title="List View"

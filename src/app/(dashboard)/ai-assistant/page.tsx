@@ -1,6 +1,5 @@
 import React from 'react';
 import { createClient } from '@/lib/supabase/server';
-import { getProjects } from '@/lib/actions/projects';
 import { Project } from '@/types';
 import AIAssistantChat from '@/components/ai/AIAssistantChat';
 
@@ -14,8 +13,14 @@ export default async function AIAssistantPage() {
   if (user) {
     userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Developer';
 
-    const { projects: projList } = await getProjects();
-    projects = (projList || []).filter((p) => p.status !== 'Archived');
+    const { data } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('user_id', user.id)
+      .neq('status', 'Archived')
+      .order('name', { ascending: true });
+
+    projects = (data as unknown as Project[]) || [];
   }
 
   return (

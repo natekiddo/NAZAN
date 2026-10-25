@@ -9,14 +9,12 @@ import {
   Calendar,
   Loader2,
   ExternalLink,
-  Sparkles,
 } from 'lucide-react';
 import { FileItem, Folder } from '@/types';
 import FileIcon from './FileIcon';
 import { formatDate, formatFileSize } from '@/lib/utils';
 import { getSignedFileUrl } from '@/lib/actions/files';
 import FileActionModal from './FileActionModal';
-import FileGeminiAnalysisModal from './FileGeminiAnalysisModal';
 
 interface FileGridProps {
   files: (FileItem & { project?: { name: string } | null })[];
@@ -27,7 +25,6 @@ interface FileGridProps {
 export default function FileGrid({ files, folders, onFileUpdated }: FileGridProps) {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [activeActionFile, setActiveActionFile] = useState<FileItem | null>(null);
-  const [geminiAnalysisFile, setGeminiAnalysisFile] = useState<FileItem | null>(null);
 
   const handleDownload = async (file: FileItem) => {
     setDownloadingId(file.id);
@@ -62,14 +59,6 @@ export default function FileGrid({ files, folders, onFileUpdated }: FileGridProp
               </div>
 
               <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setGeminiAnalysisFile(file)}
-                  title="Analyze with Gemini AI"
-                  className="p-1.5 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition-colors cursor-pointer"
-                >
-                  <Sparkles className="w-4 h-4 animate-pulse" />
-                </button>
-
                 <button
                   onClick={() => handleDownload(file)}
                   disabled={downloadingId === file.id}
@@ -138,14 +127,6 @@ export default function FileGrid({ files, folders, onFileUpdated }: FileGridProp
           file={activeActionFile}
           folders={folders}
           onUpdated={onFileUpdated}
-        />
-      )}
-
-      {geminiAnalysisFile && (
-        <FileGeminiAnalysisModal
-          isOpen={true}
-          onClose={() => setGeminiAnalysisFile(null)}
-          file={geminiAnalysisFile}
         />
       )}
     </>

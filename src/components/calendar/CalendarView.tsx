@@ -206,7 +206,7 @@ export default function CalendarView({
   const getEventBadgeClass = (type: CalendarEvent['type']) => {
     switch (type) {
       case 'task':
-        return 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800';
+        return 'bg-brand-50 dark:bg-slate-800 text-brand-500 dark:text-saffron-400 border-brand-100 dark:border-brand-700';
       case 'project':
         return 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800';
       case 'milestone':
@@ -223,7 +223,7 @@ export default function CalendarView({
         <div>
           <p className="section-kicker mb-2">Make room for what matters</p>
           <h1 className="text-3xl font-semibold tracking-[-0.045em] text-slate-950 dark:text-white flex items-center gap-2.5">
-            <span className="rounded-xl bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400"><CalendarIcon className="w-5 h-5" /></span>
+            <span className="rounded-xl bg-brand-50 p-2 text-brand-500 dark:bg-slate-800 dark:text-saffron-400"><CalendarIcon className="w-5 h-5" /></span>
             Calendar
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
@@ -311,7 +311,7 @@ export default function CalendarView({
               onClick={() => setViewMode('month')}
               className={`px-3 py-1 rounded-lg font-medium transition-colors ${
                 viewMode === 'month'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-2xs font-bold'
+                  ? 'bg-white dark:bg-slate-700 text-brand-500 dark:text-saffron-400 shadow-2xs font-bold'
                   : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
@@ -321,7 +321,7 @@ export default function CalendarView({
               onClick={() => setViewMode('agenda')}
               className={`px-3 py-1 rounded-lg font-medium transition-colors ${
                 viewMode === 'agenda'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-2xs font-bold'
+                  ? 'bg-white dark:bg-slate-700 text-brand-500 dark:text-saffron-400 shadow-2xs font-bold'
                   : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
@@ -367,7 +367,7 @@ export default function CalendarView({
                     <span
                       className={`inline-flex items-center justify-center text-xs font-semibold rounded-full w-6 h-6 ${
                         isToday
-                          ? 'bg-indigo-600 text-white font-bold shadow-xs'
+                          ? 'bg-brand-500 text-white font-bold shadow-xs dark:bg-saffron-400 dark:text-slate-900'
                           : cell.isCurrentMonth
                           ? 'text-slate-800 dark:text-slate-200'
                           : 'text-slate-400'
@@ -383,7 +383,7 @@ export default function CalendarView({
                         setIsReminderModalOpen(true);
                       }}
                       title="Add reminder for this day"
-                      className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-0.5 rounded text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-opacity"
+                      className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-0.5 rounded text-slate-400 hover:text-brand-500 dark:hover:text-saffron-400 transition-opacity"
                     >
                       <Plus className="w-3.5 h-3.5" />
                     </button>
@@ -462,7 +462,7 @@ export default function CalendarView({
                     {ev.project_id && (
                       <Link
                         href={`/projects/${ev.project_id}`}
-                        className="p-1 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        className="p-1 text-slate-400 hover:text-brand-500 dark:hover:text-saffron-400 transition-colors"
                       >
                         <ArrowUpRight className="w-4 h-4" />
                       </Link>
@@ -529,7 +529,7 @@ export default function CalendarView({
                   setSelectedDayEvents(null);
                   setIsReminderModalOpen(true);
                 }}
-                className="inline-flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline"
+                className="inline-flex items-center gap-1.5 text-xs text-brand-500 dark:text-saffron-400 font-semibold hover:underline"
               >
                 <Plus className="w-3.5 h-3.5" />
                 Add reminder for this day

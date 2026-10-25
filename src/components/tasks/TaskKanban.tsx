@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   MoreVertical,
   Clock,
@@ -24,10 +24,10 @@ interface TaskKanbanProps {
 
 const columns: { status: TaskStatus; label: string; dotColor: string }[] = [
   { status: 'Backlog', label: 'Backlog', dotColor: 'bg-slate-400' },
-  { status: 'To Do', label: 'To Do', dotColor: 'bg-indigo-400' },
-  { status: 'In Progress', label: 'In Progress', dotColor: 'bg-indigo-600' },
+  { status: 'To Do', label: 'To Do', dotColor: 'bg-brand-300' },
+  { status: 'In Progress', label: 'In Progress', dotColor: 'bg-brand-500' },
   { status: 'Blocked', label: 'Blocked', dotColor: 'bg-rose-500' },
-  { status: 'Completed', label: 'Completed', dotColor: 'bg-emerald-600' },
+  { status: 'Completed', label: 'Completed', dotColor: 'bg-brand-700' },
 ];
 
 export default function TaskKanban({
@@ -36,9 +36,21 @@ export default function TaskKanban({
   onAddTask,
   onRefresh,
 }: TaskKanbanProps) {
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<TaskStatus | null>(null);
+
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     await updateTaskStatus(taskId, newStatus);
     onRefresh();
+  };
+
+  const handleDrop = async (status: TaskStatus) => {
+    if (!draggedTaskId) return;
+    const task = tasks.find((item) => item.id === draggedTaskId);
+    setDropTarget(null);
+    setDraggedTaskId(null);
+    if (!task || task.status === status) return;
+    await handleStatusChange(task.id, status);
   };
 
   const handleDelete = async (task: Task) => {
@@ -55,21 +67,39 @@ export default function TaskKanban({
       case 'High':
         return 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900';
       case 'Medium':
-        return 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800';
+        return 'bg-brand-50 dark:bg-slate-800 text-brand-500 dark:text-saffron-400 border-brand-100 dark:border-brand-700';
       default:
         return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700';
     }
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 overflow-x-auto pb-4">
+    <div aria-label="Task board" className="flex w-full min-w-0 items-start gap-4 overflow-x-auto pb-4">
       {columns.map((col) => {
         const colTasks = tasks.filter((t) => t.status === col.status);
 
         return (
           <div
             key={col.status}
-            className="flex flex-col bg-slate-100/70 dark:bg-slate-900/60 rounded-2xl p-3 border border-slate-200/80 dark:border-slate-800/80 min-w-[240px]"
+            onDragOver={(event) => {
+              if (!draggedTaskId) return;
+              event.preventDefault();
+              setDropTarget(col.status);
+            }}
+            onDragLeave={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+                setDropTarget((current) => current === col.status ? null : current);
+              }
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              void handleDrop(col.status);
+            }}
+            className={`flex min-h-[280px] w-[260px] shrink-0 flex-col rounded-lg border p-3 transition-colors ${
+              dropTarget === col.status
+                ? 'border-indigo-400 bg-indigo-50/80 dark:border-indigo-400/70 dark:bg-indigo-400/10'
+                : 'border-slate-200/80 bg-slate-100/70 dark:border-slate-800/80 dark:bg-slate-900/60'
+            }`}
           >
             {/* Column Header */}
             <div className="flex items-center justify-between px-2 py-2 mb-2">
@@ -108,7 +138,21 @@ export default function TaskKanban({
                   return (
                     <div
                       key={task.id}
-                      className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs hover:shadow-xs transition-shadow space-y-2.5 group"
+                      draggable
+                      onDragStart={(event) => {
+                        event.dataTransfer.effectAllowed = 'move';
+                        event.dataTransfer.setData('text/plain', task.id);
+                        setDraggedTaskId(task.id);
+                      }}
+                      onDragEnd={() => {
+                        setDraggedTaskId(null);
+                        setDropTarget(null);
+                      }}
+                      className={`group space-y-2.5 rounded-lg border border-slate-200 bg-white p-3.5 shadow-2xs transition dark:border-slate-800 dark:bg-slate-900 ${
+                        draggedTaskId === task.id
+                          ? 'cursor-grabbing opacity-45'
+                          : 'cursor-grab hover:border-slate-300 hover:shadow-xs dark:hover:border-slate-700'
+                      }`}
                     >
                       {/* Priority and Project */}
                       <div className="flex items-center justify-between text-[10px]">
@@ -123,7 +167,7 @@ export default function TaskKanban({
                         <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => onEditTask(task)}
-                            className="p-1 hover:text-indigo-600 dark:hover:text-indigo-400"
+                            className="p-1 hover:text-brand-500 dark:hover:text-saffron-400"
                             title="Edit"
                           >
                             <Edit className="w-3 h-3" />
@@ -145,7 +189,7 @@ export default function TaskKanban({
 
                       {/* Project Name */}
                       {task.project?.name && (
-                        <div className="flex items-center gap-1 text-[11px] text-indigo-600 dark:text-indigo-400 truncate">
+                        <div className="flex items-center gap-1 text-[11px] text-brand-500 dark:text-saffron-400 truncate">
                           <FolderGit2 className="w-3 h-3 shrink-0" />
                           <span className="truncate">{task.project.name}</span>
                         </div>
@@ -192,3 +236,4 @@ export default function TaskKanban({
     </div>
   );
 }
+

@@ -94,7 +94,7 @@ export default function SessionJournalView({
         <div>
           <p className="section-kicker mb-2">A record of focused work</p>
           <h1 className="text-3xl font-semibold tracking-[-0.045em] text-slate-950 dark:text-white flex items-center gap-2.5">
-            <span className="rounded-xl bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400"><Clock className="w-5 h-5" /></span>
+            <span className="rounded-xl bg-brand-50 p-2 text-brand-500 dark:bg-slate-800 dark:text-saffron-400"><Clock className="w-5 h-5" /></span>
             Work sessions
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
@@ -151,7 +151,7 @@ export default function SessionJournalView({
             Past 7 Days
           </span>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+            <span className="text-2xl sm:text-3xl font-bold text-brand-500 dark:text-saffron-400">
               {thisWeekHours}
             </span>
             <span className="text-xs text-slate-500">hours</span>
@@ -163,7 +163,7 @@ export default function SessionJournalView({
             Active Projects Worked
           </span>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+            <span className="text-2xl sm:text-3xl font-bold text-brand-500 dark:text-saffron-400">
               {distinctProjectsCount}
             </span>
             <span className="text-xs text-slate-500">projects</span>
@@ -181,7 +181,7 @@ export default function SessionJournalView({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search journal entries, accomplishments, stopping points..."
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs border border-transparent focus:border-[#91b76a] focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-colors"
+            className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs border border-transparent focus:border-brand-300 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-colors"
           />
         </div>
 
@@ -190,7 +190,7 @@ export default function SessionJournalView({
           <select
             value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs border border-slate-200 dark:border-slate-700 font-medium focus:ring-2 focus:ring-[#91b76a] focus:outline-none cursor-pointer"
+            className="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs border border-slate-200 dark:border-slate-700 font-medium focus:ring-2 focus:ring-brand-300 focus:outline-none cursor-pointer"
           >
             <option value="all">All Projects ({projects.length})</option>
             {projects.map((p) => (

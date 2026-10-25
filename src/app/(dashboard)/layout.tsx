@@ -10,8 +10,6 @@ import ActiveSessionBar from '@/components/sessions/ActiveSessionBar';
 import SessionModal from '@/components/sessions/SessionModal';
 import StartSessionDialog from '@/components/sessions/StartSessionDialog';
 import { createClient } from '@/lib/supabase/client';
-import { getUserWorkspaces } from '@/lib/actions/workspaces';
-import { Workspace } from '@/types';
 
 export default function DashboardLayout({
   children,
@@ -24,8 +22,6 @@ export default function DashboardLayout({
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [isQuickCreateOpen, setIsQuickCreateOpen] = useState<boolean>(false);
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>('');
 
   useEffect(() => {
     async function fetchUserData() {
@@ -46,15 +42,6 @@ export default function DashboardLayout({
           .eq('is_read', false);
 
         setUnreadCount(count || 0);
-
-        // Fetch user workspaces
-        try {
-          const wsRes = await getUserWorkspaces();
-          setWorkspaces(wsRes.workspaces || []);
-          setActiveWorkspaceId(wsRes.activeWorkspaceId || '');
-        } catch (e) {
-          console.warn('Could not load workspaces in layout', e);
-        }
       }
     }
 
@@ -68,21 +55,18 @@ export default function DashboardLayout({
         <Sidebar />
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 relative">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(99,102,241,0.12),transparent_70%),radial-gradient(circle_at_bottom_left,rgba(6,182,212,0.06),transparent_40%)]" />
+        <div className="flex-1 flex flex-col min-w-0">
           <TopNavbar
             userEmail={userEmail}
             userName={userName}
             avatarUrl={avatarUrl}
             unreadCount={unreadCount}
-            workspaces={workspaces}
-            activeWorkspaceId={activeWorkspaceId}
             onOpenSearch={() => setIsSearchOpen(true)}
             onOpenQuickCreate={() => setIsQuickCreateOpen(true)}
           />
 
-          <main className="relative flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-            <div className="mx-auto w-full max-w-[1440px]">{children}</div>
+          <main className="app-canvas flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+            {children}
           </main>
         </div>
 

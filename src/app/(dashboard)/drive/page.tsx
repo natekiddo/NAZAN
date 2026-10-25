@@ -2,7 +2,6 @@ import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { Project, FileItem } from '@/types';
 import { getDriveIntegrationStatus } from '@/lib/actions/drive';
-import { getProjects } from '@/lib/actions/projects';
 import { hasGoogleOAuthCredentials } from '@/lib/google-drive';
 import GoogleDriveView from '@/components/drive/GoogleDriveView';
 
@@ -25,7 +24,12 @@ export default async function GoogleDrivePage() {
   // 2. Fetch projects and linked files if user is authenticated
   if (user) {
     const [projRes, filesRes] = await Promise.all([
-      getProjects(),
+      supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', user.id)
+        .neq('status', 'Archived')
+        .order('name', { ascending: true }),
       supabase
         .from('files')
         .select('*, project:projects(name)')
@@ -35,7 +39,7 @@ export default async function GoogleDrivePage() {
         .order('created_at', { ascending: false }),
     ]);
 
-    projects = (projRes.projects || []).filter((p) => p.status !== 'Archived');
+    projects = (projRes.data as unknown as Project[]) || [];
     linkedFiles = (filesRes.data as unknown as (FileItem & { project?: { name: string } | null })[]) || [];
   }
 

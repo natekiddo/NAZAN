@@ -151,6 +151,14 @@ export default function StartSessionDialog() {
               )}
             </div>
 
+            {projects.find((project) => project.id === selectedProjectId)?.next_action?.trim() && (
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--background-soft)] px-3.5 py-3">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Saved next step</p>
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-800 dark:text-slate-100">
+                  {projects.find((project) => project.id === selectedProjectId)?.next_action}
+                </p>
+              </div>
+            )}
             {/* Optional Task Picker */}
             {tasks.length > 0 && (
               <div>

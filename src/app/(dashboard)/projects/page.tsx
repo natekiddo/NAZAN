@@ -30,21 +30,13 @@ export default function ProjectsPage() {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (user) {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('projects')
         .select('*')
+        .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
 
-      if (data && !error) {
-        setProjects((data as unknown as Project[]) || []);
-      } else {
-        const { data: ownData } = await supabase
-          .from('projects')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('updated_at', { ascending: false });
-        setProjects((ownData as unknown as Project[]) || []);
-      }
+      setProjects((data as unknown as Project[]) || []);
     }
     setLoading(false);
   };
@@ -97,10 +89,10 @@ export default function ProjectsPage() {
 
         <button
           onClick={handleOpenCreate}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all cursor-pointer self-start sm:self-auto"
+          className="workspace-primary-button self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
-          <span>Create New Project</span>
+          Create New Project
         </button>
       </div>
 
@@ -141,7 +133,7 @@ export default function ProjectsPage() {
               onClick={() => setViewMode('grid')}
               className={`p-1.5 rounded-lg text-xs transition-colors ${
                 viewMode === 'grid'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-2xs font-bold'
+                  ? 'bg-white dark:bg-slate-700 text-brand-500 dark:text-saffron-400 shadow-2xs'
                   : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
               title="Grid view"
@@ -152,7 +144,7 @@ export default function ProjectsPage() {
               onClick={() => setViewMode('table')}
               className={`p-1.5 rounded-lg text-xs transition-colors ${
                 viewMode === 'table'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-2xs font-bold'
+                  ? 'bg-white dark:bg-slate-700 text-brand-500 dark:text-saffron-400 shadow-2xs'
                   : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
               title="Table view"
@@ -168,7 +160,7 @@ export default function ProjectsPage() {
         <div className="p-12 text-center text-xs text-slate-400">Loading projects...</div>
       ) : filteredProjects.length === 0 ? (
         <div className="workspace-empty space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto">
+          <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-slate-800 text-brand-500 dark:text-saffron-400 flex items-center justify-center mx-auto">
             <FolderGit2 className="w-6 h-6" />
           </div>
           <div className="space-y-1">
@@ -184,10 +176,10 @@ export default function ProjectsPage() {
           {!(searchQuery || statusFilter !== 'All') && (
             <button
               onClick={handleOpenCreate}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+              className="workspace-primary-button"
             >
               <Plus className="w-4 h-4" />
-              <span>Create Project</span>
+              Create project
             </button>
           )}
         </div>

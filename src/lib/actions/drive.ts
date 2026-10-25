@@ -11,7 +11,6 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import {
   fetchDriveFilesWithToken,
   refreshGoogleToken,
-  createDriveFolder,
   GoogleDriveFile,
 } from '@/lib/google-drive';
 import { Integration, FileItem } from '@/types';
@@ -69,9 +68,10 @@ export async function getDriveIntegrationStatus() {
   return { connected: false };
 }
 
-export async function getUserDriveAccessToken(): Promise<string | null> {
+export async function fetchUserDriveFiles(searchQuery?: string) {
   let token: string | null = null;
   let refreshToken: string | null = null;
+
   let expiresAt: string | null = null;
 
   // 1. Read token from cookie first
@@ -114,43 +114,24 @@ export async function getUserDriveAccessToken(): Promise<string | null> {
   }
 
   if (!token) {
-    return null;
+    return { error: 'Google Drive is not connected', files: [] };
   }
 
-  // 3. Attempt token refresh if expired
+  // 3. Attempt token refresh only if expired
   const isExpired = expiresAt ? new Date(expiresAt).getTime() <= Date.now() + 60000 : false;
   if (isExpired && refreshToken) {
     try {
       const refreshed = await refreshGoogleToken(refreshToken);
       if (refreshed?.access_token) {
-        return refreshed.access_token;
+        token = refreshed.access_token;
       }
     } catch {}
   }
 
-  return token;
-}
-
-export async function fetchUserDriveFiles(searchQuery?: string) {
-  let token = await getUserDriveAccessToken();
-  let refreshToken: string | null = null;
-
-  // Get refresh token for retry fallback
-  const cookieStore = await cookies();
-  const gdriveCookie = cookieStore.get('projecthub_gdrive_auth')?.value;
-  if (gdriveCookie) {
-    try {
-      refreshToken = JSON.parse(gdriveCookie).refresh_token;
-    } catch {}
-  }
-
-  if (!token) {
-    return { error: 'Google Drive is not connected', files: [] };
-  }
-
   let files = await fetchDriveFilesWithToken(token, searchQuery);
 
-  if (files.length === 0 && refreshToken) {
+  // If initial fetch returned empty and we have a refresh token, try one refresh in case of token expiry
+  if (files.length === 0 && refreshToken && !isExpired) {
     try {
       const refreshed = await refreshGoogleToken(refreshToken);
       if (refreshed?.access_token) {
@@ -306,96 +287,3 @@ export async function linkDriveUrlToProject(
 
   return { success: true, file: data as FileItem };
 }
-
-export async function setProjectDriveFolder(
-  projectId: string,
-  folderId: string,
-  folderName: string
-) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'Unauthorized: User not authenticated' };
-  }
-
-  const { error } = await supabase
-    .from('projects')
-    .update({
-      drive_folder_id: folderId,
-      drive_folder_name: folderName,
-      updated_at: new Date().toISOString(),
-    } as any)
-    .eq('id', projectId);
-
-  if (error) {
-    return { error: error.message };
-  }
-
-  revalidatePath(`/projects/${projectId}`);
-  revalidatePath('/projects');
-  revalidatePath('/drive');
-  return { success: true };
-}
-
-export async function createProjectDriveFolderAction(
-  projectId: string,
-  folderName?: string
-) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'Unauthorized: User not authenticated' };
-  }
-
-  const token = await getUserDriveAccessToken();
-  if (!token) {
-    return { error: 'Google Drive is not connected. Please connect Google Drive first.' };
-  }
-
-  // Get project name if folderName not supplied
-  let targetName = folderName?.trim();
-  if (!targetName) {
-    const { data: proj } = await supabase
-      .from('projects')
-      .select('name')
-      .eq('id', projectId)
-      .single();
-    targetName = proj?.name ? `ProjectHub - ${proj.name}` : 'ProjectHub - Project Folder';
-  }
-
-  const folderRes = await createDriveFolder(token, targetName);
-  if (!folderRes.success || !folderRes.folder) {
-    return { error: folderRes.error || 'Failed to create folder on Google Drive' };
-  }
-
-  // Update project
-  await supabase
-    .from('projects')
-    .update({
-      drive_folder_id: folderRes.folder.id,
-      drive_folder_name: folderRes.folder.name,
-      updated_at: new Date().toISOString(),
-    } as any)
-    .eq('id', projectId);
-
-  // Log activity
-  await supabase.from('activity_logs').insert({
-    user_id: user.id,
-    action: 'created_project_drive_folder',
-    entity_type: 'project',
-    entity_id: projectId,
-    details: {
-      folder_id: folderRes.folder.id,
-      folder_name: folderRes.folder.name,
-    },
-  } as any);
-
-  revalidatePath(`/projects/${projectId}`);
-  revalidatePath('/projects');
-  revalidatePath('/drive');
-
-  return { success: true, folder: folderRes.folder };
-}
-

@@ -1,23 +1,24 @@
 import type { Metadata } from "next";
-import { Anton, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Sora, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
+
+const sora = Sora({
+  variable: "--font-sora",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 const hanken = Hanken_Grotesk({
   variable: "--font-hanken",
   subsets: ["latin"],
-});
-
-const anton = Anton({
-  variable: "--font-anton",
-  subsets: ["latin"],
-  weight: "400",
+  display: "swap",
 });
 
 const jetbrains = JetBrains_Mono({
   variable: "--font-jetbrains",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -34,7 +35,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${hanken.variable} ${anton.variable} ${jetbrains.variable} h-full antialiased`}
+      className={`${sora.variable} ${hanken.variable} ${jetbrains.variable} h-full antialiased`}
     >
       <head>
         <script

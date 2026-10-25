@@ -13,13 +13,10 @@ import {
   Archive,
   CheckCircle2,
   Clock,
-  FileDown,
-  Loader2,
 } from 'lucide-react';
 import { Project } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { deleteProject, archiveProject } from '@/lib/actions/projects';
-import { exportProjectReportAction } from '@/lib/actions/reports';
 import ProjectFormModal from '@/components/projects/ProjectFormModal';
 
 interface ProjectDetailHeaderProps {
@@ -30,7 +27,6 @@ interface ProjectDetailHeaderProps {
 export default function ProjectDetailHeader({ project, taskStats }: ProjectDetailHeaderProps) {
   const router = useRouter();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
 
   const handleDelete = async () => {
     if (confirm(`Delete project "${project.name}" permanently?`)) {
@@ -44,32 +40,6 @@ export default function ProjectDetailHeader({ project, taskStats }: ProjectDetai
     const isArchived = project.status === 'Archived';
     await archiveProject(project.id, !isArchived);
     router.refresh();
-  };
-
-  const handleExportReport = async (format: 'markdown' | 'csv') => {
-    setIsExporting(true);
-    try {
-      const res = await exportProjectReportAction(project.id, format);
-      if (res.error) {
-        alert(res.error);
-      } else if (res.content && res.filename) {
-        const blob = new Blob([res.content], {
-          type: format === 'csv' ? 'text/csv' : 'text/markdown',
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = res.filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-    } catch (e: any) {
-      alert(e?.message || 'Failed to export report');
-    } finally {
-      setIsExporting(false);
-    }
   };
 
   return (
@@ -137,20 +107,6 @@ export default function ProjectDetailHeader({ project, taskStats }: ProjectDetai
                 <Globe className="w-4 h-4" />
               </a>
             )}
-
-            <button
-              disabled={isExporting}
-              onClick={() => handleExportReport('markdown')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
-              title="Export Markdown Status Report"
-            >
-              {isExporting ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <FileDown className="w-3.5 h-3.5" />
-              )}
-              <span>Report</span>
-            </button>
 
             <button
               onClick={() => setIsEditModalOpen(true)}

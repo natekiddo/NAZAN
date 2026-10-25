@@ -82,7 +82,7 @@ export default function TaskList({ tasks, onEditTask, onRefresh }: TaskListProps
                     </span>
 
                     {task.project?.name && (
-                      <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium">
+                      <span className="flex items-center gap-1 text-brand-500 dark:text-saffron-400 font-medium">
                         <FolderGit2 className="w-3 h-3" />
                         {task.project.name}
                       </span>

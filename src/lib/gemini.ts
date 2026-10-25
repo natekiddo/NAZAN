@@ -167,78 +167,43 @@ export async function askAIAssistantWithContext(
     notes?: Array<{ title: string; content?: string }>;
     sessions?: Array<{ title: string; work_completed?: string; next_action?: string }>;
   },
-  chatHistory?: Array<{ role: 'user' | 'model' | 'assistant'; content: string }>
+  chatHistory?: Array<{ role: 'user' | 'model'; content: string }>
 ): Promise<string> {
   const ai = getGeminiClient();
 
+  // Try live Gemini 3.8 Flash if client is available
   if (ai) {
-    const systemPrompt = `You are ProjectHub AI, an elite Senior Staff Full-Stack Software Architect, Agile Tech Lead, and engineering partner powered by Google Gemini 3.8 Flash.
-You are sharp, articulate, practical, and highly skilled in modern tech stacks (Next.js 15, TypeScript, Tailwind CSS, Supabase, Google Cloud, Python, React, APIs, Docker, and system design).
-
-Your Core Principles:
-1. Direct, high-value technical answers: No generic fluff, no corporate disclaimers, no timid evasions. Give real, production-ready code and actionable architecture.
-2. Contextual conversational memory: You remember the full conversation history. When the user asks follow-up questions, seamlessly reference previous decisions, code blocks, or thoughts.
-3. Proactive problem-solving: When suggesting code, provide clean, idiomatic snippets with brief explanations of the non-obvious parts.
-4. Engaging and inspiring tone: Speak like a top-tier peer engineer and trusted tech lead. Be encouraging, precise, and enthusiastic about building great software.
+    try {
+      const systemPrompt = `You are ProjectHub AI, a senior full-stack software engineer and personal project assistant powered by Google Gemini 3.8 Flash.
+You help the developer plan features, debug code, design architectures, organize tasks, break down complex requirements, and stay productive.
 
 ${
   contextData?.projectName
     ? `CURRENT PROJECT CONTEXT:
-* Project Name: "${contextData.projectName}"
-* Description: "${contextData.projectDescription || 'No description provided'}"
-* Tasks: ${JSON.stringify(contextData.tasks || [])}
-* Recent Work Sessions: ${JSON.stringify(contextData.sessions || [])}
-* Project Notes: ${JSON.stringify(contextData.notes || [])}`
-    : 'WORKSPACE CONTEXT: Operating at global workspace scope across all projects and engineering domains.'
-}`;
+Project: ${contextData.projectName}
+Description: ${contextData.projectDescription || 'No description provided'}
+Recent Tasks: ${JSON.stringify(contextData.tasks || [])}
+Recent Sessions: ${JSON.stringify(contextData.sessions || [])}
+Notes: ${JSON.stringify(contextData.notes || [])}`
+    : 'No single project selected - providing general software engineering and workspace assistance.'
+}
 
-    // Build multi-turn conversational contents
-    const contents: Array<any> = [];
+Respond concisely with clean Markdown, code snippets where relevant, and clear next actions.`;
 
-    if (chatHistory && chatHistory.length > 0) {
-      // Add previous conversational turns (up to last 16 messages for deep memory)
-      const recentHistory = chatHistory.slice(-16);
-      for (let i = 0; i < recentHistory.length; i++) {
-        const item = recentHistory[i];
-        const role = item.role === 'model' || item.role === 'assistant' ? 'model' : 'user';
-        let text = item.content;
-        if (i === 0 && role === 'user') {
-          text = `[System Instructions:\n${systemPrompt}]\n\n${text}`;
-        }
-        contents.push({
-          role,
-          parts: [{ text }],
-        });
+      const contents: Array<any> = [
+        {
+          role: 'user',
+          parts: [{ text: `${systemPrompt}\n\nUser Question:\n${userQuery}` }],
+        },
+      ];
+
+      const response = await callGeminiGenerate(ai, contents);
+
+      if (response.text) {
+        return response.text;
       }
-      contents.push({
-        role: 'user',
-        parts: [{ text: userQuery }],
-      });
-    } else {
-      contents.push({
-        role: 'user',
-        parts: [{ text: `[System Instructions:\n${systemPrompt}]\n\nUser Question:\n${userQuery}` }],
-      });
-    }
-
-    // Attempt generation with retry for temporary demand spikes
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        const response = await ai.models.generateContent({
-          model: GEMINI_MODEL,
-          contents,
-        });
-
-        if (response.text) {
-          return response.text;
-        }
-      } catch (err: any) {
-        console.warn(`Gemini 3.8 Flash attempt ${attempt} failed:`, err?.message);
-        if (attempt === 1 && (err?.message?.includes('503') || err?.message?.includes('demand'))) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          continue;
-        }
-      }
+    } catch (error: any) {
+      console.warn('Gemini 3.8 Flash generation failed, using intelligent local engine:', error?.message);
     }
   }
 
@@ -374,210 +339,3 @@ How else can I assist? You can ask me to:
 ---
 *⚡ Built-in Intelligent Workspace Engine. Add \`GEMINI_API_KEY\` to \`.env.local\` to activate Google Gemini 3.8 Flash.*`;
 }
-
-export interface ProjectMemoryContext {
-  projectName: string;
-  projectDescription?: string;
-  lastSession?: {
-    title: string;
-    work_completed?: string | null;
-    next_action?: string | null;
-    blockers?: string | null;
-    start_time: string;
-    duration_mins?: number;
-  } | null;
-  tasks: Array<{
-    title: string;
-    status: string;
-    priority: string;
-    due_date?: string | null;
-  }>;
-  recentNotes: Array<{
-    title: string;
-    content?: string | null;
-  }>;
-  recentActivity: Array<{
-    action: string;
-    actor_name?: string;
-    details?: any;
-    created_at: string;
-  }>;
-}
-
-export async function generateProjectMemoryBriefing(context: ProjectMemoryContext): Promise<string> {
-  const ai = getGeminiClient();
-
-  const unfinishedTasks = context.tasks.filter(
-    (t) => t.status !== 'Completed' && t.status !== 'completed' && t.status !== 'Done'
-  );
-
-  if (ai) {
-    try {
-      const prompt = `You are ProjectHub AI, Senior Staff Engineering Lead and Technical Advisor.
-Analyze the project context below and create a comprehensive, fact-based Project Memory & Progress Briefing for the engineering team.
-
-CRITICAL INSTRUCTIONS:
-1. Do NOT invent project events, teammates, or tasks that are not in the context.
-2. Ground all answers strictly in the recorded data provided below.
-3. Clearly distinguish between "Stored Project Facts" and "AI Recommendations".
-
-PROJECT CONTEXT:
-* Project Name: "${context.projectName}"
-* Description: "${context.projectDescription || 'No description provided'}"
-* Last Work Session / Stopping Point: ${JSON.stringify(context.lastSession, null, 2)}
-* Unfinished Tasks (${unfinishedTasks.length} pending): ${JSON.stringify(unfinishedTasks, null, 2)}
-* Recent Notes & Decisions: ${JSON.stringify(context.recentNotes, null, 2)}
-* Recent Team Activity: ${JSON.stringify(context.recentActivity, null, 2)}
-
-FORMAT YOUR RESPONSE IN CLEAN GITHUB MARKDOWN WITH THESE SECTIONS:
-### 📍 Exact Stopping Point & Last Work Session
-(Where did the team/user stop working? Quote the exact work completed, blockers, and next action recorded.)
-
-### ⏳ Unfinished Tasks & Priority Status
-(List all pending tasks, highlighting high/urgent priorities and overdue dates.)
-
-### 👥 Teammate Activity & Recent Decisions
-(Summarize recent actions taken by teammates and technical decisions logged in project notes.)
-
-### 🚀 Recommended Action Plan & Next Steps
-(Concrete next micro-steps to pick up the work smoothly right now.)`;
-
-      const response = await callGeminiGenerate(ai, prompt);
-      if (response.text) {
-        return response.text;
-      }
-    } catch (err) {
-      console.warn('Gemini briefing call error, using local fallback:', err);
-    }
-  }
-
-  // Intelligent deterministic fallback
-  const s = context.lastSession;
-  return `### 📍 Exact Stopping Point & Last Work Session
-${
-  s
-    ? `* **Last Session Title:** *${s.title}* (${new Date(s.start_time).toLocaleString()})
-* **Work Completed:** ${s.work_completed || 'Work completed was not detailed in log'}
-* **Recorded Next Action:** ${s.next_action ? `👉 \`${s.next_action}\`` : 'No explicit next action logged'}
-* **Blockers Encountered:** ${s.blockers ? `⚠️ ${s.blockers}` : '✅ None logged'}`
-    : `* No previous work sessions logged yet for **${context.projectName}**. Start a session from the top bar to record your stopping points!`
-}
-
----
-
-### ⏳ Unfinished Tasks & Priority Status
-* **Pending Tasks:** ${unfinishedTasks.length} unfinished items
-${
-  unfinishedTasks.length > 0
-    ? unfinishedTasks
-        .slice(0, 5)
-        .map((t, idx) => `${idx + 1}. **${t.title}** — [Priority: \`${t.priority}\`, Status: \`${t.status}\`${t.due_date ? `, Due: ${t.due_date}` : ''}]`)
-        .join('\n')
-    : '* 🎉 All tasks in this project are currently marked as completed!'
-}
-
----
-
-### 👥 Recent Notes & Decisions
-${
-  context.recentNotes.length > 0
-    ? context.recentNotes
-        .map((n) => `* **${n.title}**: ${n.content?.slice(0, 150) || 'Note content recorded'}`)
-        .join('\n')
-    : '* No documentation notes logged yet. Add architecture notes in the Notes tab.'
-}
-
----
-
-### 🚀 Recommended Action Plan
-1. ${s?.next_action ? `Resume directly on: **${s.next_action}**` : 'Review pending tasks and pick the highest priority item.'}
-2. Review any open blockers with teammates in Team Chat.
-3. Log a 25-minute deep work session when beginning.
-
----
-*⚡ ProjectHub Intelligent Engine (Live Gemini 3.8 Flash available with GEMINI_API_KEY)*`;
-}
-
-export async function analyzeFileContent(
-  fileName: string,
-  mimeType: string,
-  content: string,
-  mode: 'explain' | 'summarize' | 'bugs' | 'tasks',
-  customPrompt?: string
-): Promise<string> {
-  const ai = getGeminiClient();
-
-  const prompts = {
-    explain: `Explain the source code or document "${fileName}" in clear, practical language.
-Highlight its overall architecture, key components, data flow, functions/classes, and how it fits into the broader system.`,
-    summarize: `Provide an executive summary of "${fileName}".
-Highlight the key takeaways, core findings, decisions, and deliverables in concise bullet points.`,
-    bugs: `Perform a thorough code review and diagnostic inspection of "${fileName}".
-Identify potential bugs, edge cases, security vulnerabilities, performance bottlenecks, and concrete refactoring suggestions with code snippets.`,
-    tasks: `Analyze "${fileName}" and extract an actionable list of engineering tasks, milestones, and implementation next steps suitable for a sprint backlog.`,
-  };
-
-  const selectedInstruction = customPrompt?.trim() || prompts[mode] || prompts.explain;
-
-  if (ai) {
-    try {
-      const fullPrompt = `You are ProjectHub AI, Senior Staff Engineer and Code Reviewer powered by Gemini 3.8 Flash.
-Your task is to analyze the file provided below according to these instructions:
-${selectedInstruction}
-
-FILE METADATA:
-* File Name: "${fileName}"
-* MIME Type: "${mimeType}"
-
-FILE CONTENT (Snippet or full text):
-\`\`\`
-${content.slice(0, 40000)}
-\`\`\`
-
-Provide a clean, structured GitHub-flavored Markdown response with practical code snippets and clear headings.`;
-
-      const response = await callGeminiGenerate(ai, fullPrompt);
-      if (response.text) {
-        return response.text;
-      }
-    } catch (err) {
-      console.warn('Gemini file analysis call failed, using intelligent fallback:', err);
-    }
-  }
-
-  // Fallback file inspection
-  const lines = content.split('\n');
-  const preview = lines.slice(0, 30).join('\n');
-
-  return `### 📄 File Analysis: \`${fileName}\`
-> *Mode: ${mode.toUpperCase()}*
-
-#### Summary & Overview
-* **File Name:** \`${fileName}\`
-* **MIME Type:** \`${mimeType}\`
-* **Total Lines Analyzed:** ${lines.length} lines (~${Math.round(content.length / 1024)} KB)
-
-#### Key Observations
-${
-  mode === 'bugs'
-    ? `* **Error Handling:** Verify all async operations use try-catch and handle null/undefined boundaries.
-* **Type Safety:** Ensure explicit TypeScript interfaces are used rather than any.
-* **Security:** Ensure sensitive API credentials and keys are never hardcoded.`
-    : mode === 'tasks'
-    ? `1. Review function interfaces and export boundaries in \`${fileName}\`.
-2. Write unit and integration tests covering edge cases.
-3. Document API parameters and return schemas.`
-    : `* The file contains ${lines.length} lines of structured content.
-* Primary structure includes exports and handler definitions.
-* Ready for review and integration.`
-}
-
-#### Content Preview
-\`\`\`text
-${preview}
-\`\`\`
-
----
-*⚡ ProjectHub Intelligent Engine. Add \`GEMINI_API_KEY\` to enable real-time Gemini 3.8 Flash deep file analysis.*`;
-}
-

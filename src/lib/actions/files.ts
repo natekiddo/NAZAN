@@ -101,10 +101,6 @@ export async function getSignedFileUrl(fileId: string) {
     return { error: fetchErr?.message || 'File not found' };
   }
 
-  if (file.storage_path?.startsWith('http://') || file.storage_path?.startsWith('https://')) {
-    return { signedUrl: file.storage_path, originalName: file.original_name };
-  }
-
   // Create signed URL valid for 60 minutes
   const { data: signedData, error: signErr } = await supabase
     .storage
@@ -332,15 +328,15 @@ export async function uploadFileDirectAction(formData: FormData) {
     return { error: 'No file provided' };
   }
 
+  const fileId = crypto.randomUUID();
+  const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const storagePath = `${user.id}/${fileId}/${sanitizedName}`;
+
   try {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Store in ProjectHub first so uploads never depend on Google Drive.
-    const fileId = crypto.randomUUID();
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_') || 'untitled';
-    const storagePath = `${user.id}/${fileId}/${sanitizedName}`;
-
+    // Try uploading to private bucket 'project-files'
     const { error: uploadErr } = await supabase.storage
       .from('project-files')
       .upload(storagePath, buffer, {
@@ -356,7 +352,7 @@ export async function uploadFileDirectAction(formData: FormData) {
       ) {
         return {
           error:
-            "Storage bucket 'project-files' is missing. Run supabase/migrations/20261010000001_storage_setup.sql in the Supabase SQL Editor, then try again.",
+            "Storage bucket 'project-files' does not exist in Supabase yet. Please run migration 'supabase/migrations/20261010000001_storage_setup.sql' in your Supabase SQL Editor.",
         };
       }
       return { error: `Storage upload error: ${uploadErr.message}` };
@@ -378,7 +374,7 @@ export async function uploadFileDirectAction(formData: FormData) {
 
     revalidatePath('/files');
     if (projectId) revalidatePath(`/projects/${projectId}`);
-    return { success: true, file: res.file, storedIn: 'cloud' };
+    return { success: true, file: res.file };
   } catch (err: any) {
     return { error: err?.message || 'Server error during upload' };
   }

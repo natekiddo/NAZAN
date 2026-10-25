@@ -16,7 +16,7 @@ import {
   FileImage,
   FileSpreadsheet,
 } from 'lucide-react';
-import { uploadFileFromBrowser } from '@/lib/uploads/browserUpload';
+import { uploadFileDirectAction } from '@/lib/actions/files';
 import { Project, Folder } from '@/types';
 import { formatFileSize } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
@@ -74,7 +74,6 @@ export default function FileDropzone({
     }));
 
     setQueue((prev) => [...prev, ...newItems]);
-    void startUpload(newItems);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -93,26 +92,27 @@ export default function FileDropzone({
     handleFilesAdded(e.dataTransfer.files);
   };
 
-  const startUpload = async (incoming?: UploadQueueItem[]) => {
-    if (isUploading) return;
-    const items = incoming || queue;
-    if (items.length === 0) return;
+  const startUpload = async () => {
+    if (queue.length === 0 || isUploading) return;
 
     setIsUploading(true);
 
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
+    for (let i = 0; i < queue.length; i++) {
+      const item = queue[i];
       if (item.status === 'completed') continue;
 
+      // Update state to uploading
       setQueue((prev) =>
         prev.map((q) => (q.id === item.id ? { ...q, status: 'uploading', progress: 40 } : q))
       );
 
       try {
-        const res = await uploadFileFromBrowser(item.file, {
-          projectId: selectedProjectId || null,
-          folderId: selectedFolderId || null,
-        });
+        const formData = new FormData();
+        formData.append('file', item.file);
+        if (selectedProjectId) formData.append('project_id', selectedProjectId);
+        if (selectedFolderId) formData.append('folder_id', selectedFolderId);
+
+        const res = await uploadFileDirectAction(formData);
 
         if (res.error) {
           setQueue((prev) =>
@@ -176,7 +176,7 @@ export default function FileDropzone({
     <div className="backdrop-blur-xl bg-white/90 dark:bg-slate-900/90 rounded-3xl border border-slate-200/90 dark:border-slate-800/90 p-6 space-y-5 shadow-xl transition-colors">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white shadow-md shadow-indigo-500/20">
+          <div className="p-2.5 rounded-2xl bg-indigo-600 text-white shadow-md shadow-indigo-500/20">
             <UploadCloud className="w-5 h-5" />
           </div>
           <div>
@@ -290,10 +290,10 @@ export default function FileDropzone({
             <UploadCloud className="w-7 h-7" />
           </div>
           <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-            Drag &amp; drop files here, or <span className="text-emerald-600 dark:text-emerald-400 underline font-semibold">browse files</span>
+            Drag &amp; drop files here, or <span className="text-indigo-600 dark:text-indigo-400 underline">browse files</span>
           </h4>
-          <p className="text-[11px] text-slate-400 mt-1 max-w-md">
-            ⚡ <strong>No file size limit.</strong> Files automatically upload directly to your connected <strong>Google Drive</strong>.
+          <p className="text-[11px] text-slate-400 mt-1 max-w-sm">
+            Supports documents, PDFs, code files, diagrams, and archives up to 50 MB each.
           </p>
         </div>
       </div>
@@ -334,7 +334,7 @@ export default function FileDropzone({
                     {item.status === 'uploading' && (
                       <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
                         <div
-                          className="bg-gradient-to-r from-indigo-500 to-cyan-400 h-full transition-all duration-300"
+                          className="bg-indigo-500 h-full transition-all duration-300"
                           style={{ width: `${item.progress}%` }}
                         />
                       </div>
@@ -378,9 +378,9 @@ export default function FileDropzone({
               Clear All
             </button>
             <button
-              onClick={() => void startUpload()}
+              onClick={startUpload}
               disabled={isUploading || allCompleted}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
             >
               {isUploading ? (
                 <>

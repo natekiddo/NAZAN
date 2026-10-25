@@ -8,15 +8,12 @@ import {
   Archive,
   Loader2,
   HardDrive,
-  FolderPlus,
-  ExternalLink,
 } from 'lucide-react';
 import JSZip from 'jszip';
 import { FileItem, Folder, Project } from '@/types';
 import FileGrid from '@/components/files/FileGrid';
 import FileDropzone from '@/components/files/FileDropzone';
 import { getProjectFilesForDownload } from '@/lib/actions/files';
-import { createProjectDriveFolderAction } from '@/lib/actions/drive';
 import { useRouter } from 'next/navigation';
 
 interface ProjectFilesTabProps {
@@ -33,7 +30,6 @@ export default function ProjectFilesTab({
   const router = useRouter();
   const [isDropzoneOpen, setIsDropzoneOpen] = useState(false);
   const [isZipping, setIsZipping] = useState(false);
-  const [creatingFolder, setCreatingFolder] = useState(false);
 
   const handleDownloadZip = async () => {
     if (files.length === 0) return;
@@ -78,82 +74,8 @@ export default function ProjectFilesTab({
     }
   };
 
-  const handleCreateDriveFolder = async () => {
-    setCreatingFolder(true);
-    try {
-      const res = await createProjectDriveFolderAction(project.id);
-      if (res.error) {
-        alert(res.error);
-      } else {
-        router.refresh();
-      }
-    } catch (e: any) {
-      alert(e?.message || 'Failed to link Google Drive folder');
-    } finally {
-      setCreatingFolder(false);
-    }
-  };
-
-  const driveFolderName = (project as any).drive_folder_name;
-  const driveFolderId = (project as any).drive_folder_id;
-
   return (
     <div className="space-y-6">
-      {/* Google Drive Project Folder Integration Bar */}
-      <div className="p-3.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold shrink-0">
-            <HardDrive className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-900 dark:text-slate-100">
-                Google Drive Cloud Folder:
-              </span>
-              {driveFolderName ? (
-                <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-medium">
-                  {driveFolderName}
-                </span>
-              ) : (
-                <span className="text-slate-400">
-                  Not linked to a dedicated Drive folder yet
-                </span>
-              )}
-            </div>
-            <p className="text-[11px] text-slate-500">
-              Files uploaded to this project automatically save to this designated Google Drive folder.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {driveFolderId ? (
-            <a
-              href={`https://drive.google.com/drive/folders/${driveFolderId}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 font-medium transition-colors"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              Open in Drive
-            </a>
-          ) : (
-            <button
-              onClick={handleCreateDriveFolder}
-              disabled={creatingFolder}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-colors cursor-pointer disabled:opacity-50"
-            >
-              {creatingFolder ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <FolderPlus className="w-3.5 h-3.5" />
-              )}
-              Create Project Drive Folder
-            </button>
-          )}
-        </div>
-      </div>
-
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">

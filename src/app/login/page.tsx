@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import {
   AuthError,
@@ -11,7 +11,6 @@ import {
   AuthShell,
   Field,
   linkClass,
-  monoFont,
   primaryButton,
 } from '@/components/auth/auth-shell';
 
@@ -48,26 +47,29 @@ export default function LoginPage() {
     <AuthShell
       footer={
         <>
-          New to ProjectHub?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/signup" className={linkClass}>
-            Create an account
+            Sign up
           </Link>
         </>
       }
     >
-      <AuthHeading title="Welcome back." text="Sign in to pick up where your best work left off." />
+      <AuthHeading
+        title="Log in"
+        text="Access your projects, saved progress, and next steps."
+      />
 
       {error && <AuthError message={error} />}
 
-      <form onSubmit={handleLogin} className="space-y-4">
+      <form onSubmit={handleLogin} className="space-y-3.5">
         <Field
-          label="Email address"
+          label="Email"
           type="email"
           required
           autoComplete="email"
           value={email}
           onChange={setEmail}
-          placeholder="you@example.com"
+          placeholder="name@example.com"
         />
 
         <Field
@@ -77,27 +79,26 @@ export default function LoginPage() {
           autoComplete="current-password"
           value={password}
           onChange={setPassword}
-          placeholder="Your password"
+          placeholder="Enter your password"
           labelRight={
             <Link
               href="/forgot-password"
-              className={`${monoFont} text-[11px] uppercase tracking-[0.06em] text-[#2E5A82] underline-offset-4 hover:underline dark:text-[#CFE0EE]`}
+              className="text-[11px] text-zinc-400 hover:text-white transition-colors"
             >
               Forgot password?
             </Link>
           }
         />
 
-        <button type="submit" disabled={loading} className={`${primaryButton} mt-7!`}>
-          {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <>
-              <span>Sign In to Workspace</span>
-              <ArrowRight className="h-4 w-4" />
-            </>
-          )}
-        </button>
+        <div className="pt-2">
+          <button type="submit" disabled={loading} className={primaryButton}>
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin text-white" />
+            ) : (
+              'Log in'
+            )}
+          </button>
+        </div>
       </form>
     </AuthShell>
   );

@@ -99,7 +99,7 @@ export default function GoogleSkillsHero({
       </div>
 
       {/* Main Hero Body (skills.google Front Door Hero) */}
-      <div className="relative overflow-hidden rounded-3xl p-8 md:p-10 bg-white dark:bg-[#0e1628] border border-slate-200/90 dark:border-slate-800/90 shadow-xl transition-all">
+      <div className="relative overflow-hidden rounded-3xl p-8 md:p-10 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800/90 shadow-xl transition-all">
         {/* Subtle background ambient Google color gradients */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-500/10 via-emerald-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-10 left-1/3 w-80 h-80 bg-gradient-to-tr from-yellow-500/10 via-rose-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />

@@ -273,7 +273,7 @@ export default function GoogleDriveView({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2.5">
-            <div className="p-2 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-white shadow-md shadow-emerald-500/20">
+            <div className="p-2 rounded-2xl bg-emerald-600 text-white shadow-md shadow-emerald-500/20">
               <HardDrive className="w-6 h-6" />
             </div>
             Google Drive &amp; Cloud Workspace
@@ -287,7 +287,7 @@ export default function GoogleDriveView({
           {/* Link via Direct URL Button (Always Available) */}
           <button
             onClick={() => setIsUrlModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
           >
             <LinkIcon className="w-3.5 h-3.5" />
             Link by Drive URL
@@ -312,7 +312,7 @@ export default function GoogleDriveView({
               </button>
               <button
                 onClick={handleConnectClick}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/25 transition-all cursor-pointer"
+                className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/25 transition-all cursor-pointer"
               >
                 <HardDrive className="w-4 h-4" />
                 Connect Google Drive
@@ -605,7 +605,7 @@ export default function GoogleDriveView({
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white shadow-md">
+                <div className="p-2.5 rounded-2xl bg-indigo-600 text-white shadow-md">
                   <LinkIcon className="w-5 h-5" />
                 </div>
                 <div>
@@ -688,7 +688,7 @@ export default function GoogleDriveView({
                 <button
                   type="submit"
                   disabled={isLinkingUrl || !urlToLink.trim() || !urlTargetProjectId}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50"
                 >
                   {isLinkingUrl ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LinkIcon className="w-3.5 h-3.5" />}
                   Link Document Now
@@ -705,7 +705,7 @@ export default function GoogleDriveView({
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-md">
+                <div className="p-2.5 rounded-2xl bg-emerald-600 text-white shadow-md">
                   <HardDrive className="w-5 h-5" />
                 </div>
                 <div>
@@ -877,7 +877,7 @@ export default function GoogleDriveView({
                 <button
                   type="submit"
                   disabled={linking || !targetProjectId}
-                  className="flex items-center gap-1.5 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50"
                 >
                   {linking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LinkIcon className="w-3.5 h-3.5" />}
                   Link Document

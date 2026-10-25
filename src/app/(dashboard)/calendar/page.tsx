@@ -1,6 +1,5 @@
 import React from 'react';
 import { createClient } from '@/lib/supabase/server';
-import { getProjects } from '@/lib/actions/projects';
 import { Project, Task, Milestone, Reminder } from '@/types';
 import CalendarView from '@/components/calendar/CalendarView';
 
@@ -14,35 +13,27 @@ export default async function CalendarPage() {
   let reminders: Reminder[] = [];
 
   if (user) {
-    const { projects: projList } = await getProjects();
-    projects = (projList || []).filter((p) => p.status !== 'Archived');
-    const projectIds = projects.map((p) => p.id);
-
-    let tasksQuery = supabase
-      .from('tasks')
-      .select('*')
-      .neq('status', 'Completed')
-      .not('due_date', 'is', null)
-      .order('due_date', { ascending: true });
-
-    let mileQuery = supabase
-      .from('milestones')
-      .select('*')
-      .eq('completed', false)
-      .not('due_date', 'is', null)
-      .order('due_date', { ascending: true });
-
-    if (projectIds.length > 0) {
-      tasksQuery = tasksQuery.or(`user_id.eq.${user.id},project_id.in.(${projectIds.join(',')})`);
-      mileQuery = mileQuery.or(`user_id.eq.${user.id},project_id.in.(${projectIds.join(',')})`);
-    } else {
-      tasksQuery = tasksQuery.eq('user_id', user.id);
-      mileQuery = mileQuery.eq('user_id', user.id);
-    }
-
-    const [tasksRes, mileRes, remRes] = await Promise.all([
-      tasksQuery,
-      mileQuery,
+    const [projRes, tasksRes, mileRes, remRes] = await Promise.all([
+      supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', user.id)
+        .neq('status', 'Archived')
+        .order('name', { ascending: true }),
+      supabase
+        .from('tasks')
+        .select('*')
+        .eq('user_id', user.id)
+        .neq('status', 'Completed')
+        .not('due_date', 'is', null)
+        .order('due_date', { ascending: true }),
+      supabase
+        .from('milestones')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('completed', false)
+        .not('due_date', 'is', null)
+        .order('due_date', { ascending: true }),
       supabase
         .from('reminders')
         .select('*')
@@ -51,6 +42,7 @@ export default async function CalendarPage() {
         .order('scheduled_for', { ascending: true }),
     ]);
 
+    projects = (projRes.data as unknown as Project[]) || [];
     tasks = (tasksRes.data as unknown as Task[]) || [];
     milestones = (mileRes.data as unknown as Milestone[]) || [];
     reminders = (remRes.data as unknown as Reminder[]) || [];

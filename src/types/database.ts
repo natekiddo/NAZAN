@@ -496,7 +496,7 @@ export interface Database {
       notification_deliveries: {
         Row: {
           id: string
-          reminder_id: string
+          reminder_id: string | null
           user_id: string
           channel: 'in_app' | 'email'
           status: 'sent' | 'failed'
@@ -506,7 +506,7 @@ export interface Database {
         }
         Insert: {
           id?: string
-          reminder_id: string
+          reminder_id?: string | null
           user_id: string
           channel: 'in_app' | 'email'
           status: 'sent' | 'failed'
@@ -516,7 +516,7 @@ export interface Database {
         }
         Update: {
           id?: string
-          reminder_id?: string
+          reminder_id?: string | null
           user_id?: string
           channel?: 'in_app' | 'email'
           status?: 'sent' | 'failed'

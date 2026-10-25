@@ -93,7 +93,7 @@ export default function GoogleSkillsCard({
 
   return (
     <div
-      className={`group relative flex flex-col justify-between p-6 rounded-3xl bg-white dark:bg-[#0f172a] border border-slate-200/90 dark:border-slate-800/90 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${theme.border}`}
+      className={`group relative flex flex-col justify-between p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800/90 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${theme.border}`}
     >
       {/* Top Banner & Header Tags */}
       <div className="space-y-4">

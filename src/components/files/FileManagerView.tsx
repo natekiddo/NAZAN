@@ -50,7 +50,7 @@ export default function FileManagerView({
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Modals & Panels
-  const [isDropzoneOpen, setIsDropzoneOpen] = useState(true);
+  const [isDropzoneOpen, setIsDropzoneOpen] = useState(false);
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
   const [isZipping, setIsZipping] = useState(false);
 
@@ -260,7 +260,7 @@ export default function FileManagerView({
             <span className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400">
               {formatFileSize(totalBytes)}
             </span>
-            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Unlimited</span>
+            <span className="text-xs text-slate-500">of 50 MB/file</span>
           </div>
         </div>
 

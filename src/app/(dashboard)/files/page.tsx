@@ -2,7 +2,6 @@ import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { FileItem, Folder, Project } from '@/types';
 import FileManagerView from '@/components/files/FileManagerView';
-import { getProjects } from '@/lib/actions/projects';
 
 export default async function FilesPage() {
   const supabase = await createClient();
@@ -25,12 +24,17 @@ export default async function FilesPage() {
         .select('*')
         .eq('user_id', user.id)
         .order('name', { ascending: true }),
-      getProjects(),
+      supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', user.id)
+        .neq('status', 'Archived')
+        .order('name', { ascending: true }),
     ]);
 
     files = (filesRes.data as unknown as (FileItem & { project?: { name: string } | null })[]) || [];
     folders = (foldersRes.data as unknown as Folder[]) || [];
-    projects = (projectsRes.projects || []).filter((p) => p.status !== 'Archived');
+    projects = (projectsRes.data as unknown as Project[]) || [];
   }
 
   return (

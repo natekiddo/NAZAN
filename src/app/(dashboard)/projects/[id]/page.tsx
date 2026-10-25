@@ -19,11 +19,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   }
 
   // 1. Fetch Project
-  // 1. Fetch Project
   const { data: projectData, error } = await supabase
     .from('projects')
     .select('*')
     .eq('id', id)
+    .eq('user_id', user.id)
     .single();
 
   if (error || !projectData) {
@@ -32,54 +32,43 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   const project = projectData as unknown as Project;
 
-  // Verify access: user is creator OR member of project's workspace
-  const isCreator = project.user_id === user.id;
-  if (!isCreator && (project as any).workspace_id) {
-    const { data: membership } = await supabase
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', (project as any).workspace_id)
-      .eq('user_id', user.id)
-      .single();
-
-    if (!membership) {
-      notFound();
-    }
-  } else if (!isCreator && !(project as any).workspace_id) {
-    notFound();
-  }
-
-  // 2. Fetch Tasks, Milestones, Notes, Sessions, Files, Folders in parallel for this project
+  // 2. Fetch Tasks, Milestones, Notes, Sessions, Files, Folders in parallel
   const [tasksRes, milestonesRes, notesRes, sessionsRes, filesRes, foldersRes] = await Promise.all([
     supabase
       .from('tasks')
       .select('*')
       .eq('project_id', id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false }),
     supabase
       .from('milestones')
       .select('*')
       .eq('project_id', id)
+      .eq('user_id', user.id)
       .order('due_date', { ascending: true }),
     supabase
       .from('project_notes')
       .select('*')
       .eq('project_id', id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false }),
     supabase
       .from('work_sessions')
       .select('*')
       .eq('project_id', id)
+      .eq('user_id', user.id)
       .order('start_time', { ascending: false }),
     supabase
       .from('files')
       .select('*')
       .eq('project_id', id)
+      .eq('user_id', user.id)
       .eq('is_trashed', false)
       .order('created_at', { ascending: false }),
     supabase
       .from('folders')
       .select('*')
+      .eq('user_id', user.id)
       .or(`project_id.eq.${id},project_id.is.null`)
       .order('name', { ascending: true }),
   ]);

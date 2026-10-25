@@ -1,8 +1,9 @@
 import React from 'react';
-import { Settings, User, Bell } from 'lucide-react';
+import { Settings, User } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { Profile, ConnectedDevice } from '@/types';
 import ConnectedDevicesView from '@/components/sync/ConnectedDevicesView';
+import NotificationPreferencesForm from '@/components/settings/NotificationPreferencesForm';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -72,38 +73,10 @@ export default async function SettingsPage() {
           </div>
         </div>
 
-        {/* Notifications & Preferences */}
-        <div className="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
-          <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Bell className="w-4 h-4 text-amber-500" />
-            Notification Channels
-          </h2>
-
-          <div className="space-y-3 text-xs">
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                defaultChecked={profile?.email_notifications ?? true}
-                className="w-4 h-4 text-indigo-600 rounded border-slate-300"
-              />
-              <span className="text-slate-700 dark:text-slate-300">
-                Receive transactional email reminders for task deadlines &amp; project milestones
-              </span>
-            </label>
-
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                defaultChecked={profile?.in_app_notifications ?? true}
-                className="w-4 h-4 text-indigo-600 rounded border-slate-300"
-              />
-              <span className="text-slate-700 dark:text-slate-300">
-                Enable in-app notification center alerts
-              </span>
-            </label>
-          </div>
-        </div>
-
+        <NotificationPreferencesForm
+          initialEmail={profile?.email_notifications ?? true}
+          initialInApp={profile?.in_app_notifications ?? true}
+        />
         {/* Desktop Synchronization Clients */}
         <ConnectedDevicesView devices={devices} />
       </div>
